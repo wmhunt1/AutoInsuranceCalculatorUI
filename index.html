@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telematics Risk Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .page-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .loading-spinner {
+            border-top-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div id="app-container" class="w-full max-w-xl bg-white rounded-xl shadow-2xl p-6 md:p-8">
+        <h1 id="app-title" class="text-3xl font-extrabold text-gray-900 text-center mb-6">
+            Telematics Risk Dashboard
+        </h1>
+
+        <!-- Container for different application views -->
+        <div id="main-content" class="page-transition">
+            <!-- Content will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // !!! IMPORTANT: Verify this URL matches your deployed Railway API !!!
+        const API_BASE_URL = 'https://autoinsurancecalculator-production.up.railway.app';
+        const NO_DATA_TEXT = 'N/A';
+        const APP_CONTAINER = document.getElementById('main-content');
+
+        let currentUser = null;
+
+        // --- UTILITY FUNCTIONS ---
+
+        /** Renders a common loading spinner */
+        function renderLoading(message) {
+            return `
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                        <div class="loading-spinner animate-spin rounded-full h-12 w-12 border-4 border-gray-200"></div>
+                        <p class="mt-4 font-semibold">${message}</p>
+                    </div>
+                `;
+        }
+
+        /** Shows messages to the user */
+        function showAlert(message, type = 'error') {
+            const container = document.getElementById('auth-form') || APP_CONTAINER;
+            const existingAlert = container.previousElementSibling;
+            if (existingAlert && existingAlert.classList.contains('alert-message')) {
+                existingAlert.remove();
+            }
+
+            const alertHtml = `
+                    <div class="alert-message p-3 mb-4 rounded-lg text-sm flex items-center ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'} transition duration-300">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            ${type === 'error' ?
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+                }
+                        </svg>
+                        ${message}
+                    </div>
+                `;
+            container.insertAdjacentHTML('beforebegin', alertHtml);
+
+            setTimeout(() => {
+                const newAlert = container.previousElementSibling;
+                if (newAlert && newAlert.classList.contains('alert-message')) {
+                    newAlert.remove();
+                }
+            }, 5000);
+        }
+
+        /** Simple fetch wrapper for POST requests with error handling */
+        async function postData(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                // Return API's error message if available, otherwise generic
+                throw new Error(result.error || `Request failed with status ${response.status}`);
+            }
+            return result;
+        }
+
+        // --- VIEW RENDERING ---
+
+        function renderAuthForm(isLogin = true) {
+            APP_CONTAINER.innerHTML = `
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-center text-indigo-600">
+                            ${isLogin ? 'Log In to View Estimate' : 'Create New Account'}
+                        </h2>
+
+                        <form id="auth-form" class="space-y-4">
+                            ${!isLogin ? `
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <input type="text" id="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                </div>
+                            ` : ''}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Username</label>
+                                <input type="text" id="username" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="password" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                            </div>
+
+                            <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                                ${isLogin ? 'Log In' : 'Create Account'}
+                            </button>
+                        </form>
+
+                        <button id="toggle-btn" class="w-full text-sm text-gray-500 hover:text-indigo-600 transition duration-150 mt-4">
+                            ${isLogin ? 'Need an account? Create User' : 'Already have an account? Log In'}
+                        </button>
+                        <p class="text-xs text-gray-400 text-center">Use 'driver1' / 'password' for existing users.</p>
+                    </div>
+                `;
+
+            document.getElementById('toggle-btn').addEventListener('click', () => renderAuthForm(!isLogin));
+            document.getElementById('auth-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const name = isLogin ? '' : document.getElementById('name').value;
+                handleAuth(isLogin, username, password, name);
+            });
+        }
+
+        /** Renders the dashboard with features and estimates */
+        function renderDashboard(data) {
+            const user = data.user_info;
+            const features = data.telematics_features;
+            const estimates = data.premium_estimates;
+
+            // Helper to format currency
+            const formatCurrency = (amount) => {
+                if (typeof amount === 'number') {
+                    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+                }
+                return NO_DATA_TEXT;
+            };
+
+            // Helper to render feature cards
+            const renderFeatureCard = (title, value, unit, isHighRisk) => `
+                    <div class="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-sm font-semibold text-gray-500">${title}</h3>
+                        <p class="text-2xl font-bold mt-1 ${isHighRisk ? 'text-red-600' : 'text-green-700'}">
+                            ${typeof value === 'number' ? value.toFixed(1) : NO_DATA_TEXT}
+                        </p>
+                        <p class="text-xs text-gray-400">${unit}</p>
+                    </div>
+                `;
+
+            // Helper to render estimate cards
+            const renderEstimateCard = (title, premium, score, message, isExternal) => {
+                const bgColor = isExternal ? 'bg-indigo-50 border-indigo-200' : (premium < 1200 ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200');
+                const premiumText = formatCurrency(premium);
+                const scoreHtml = score !== undefined ? `<p class="text-sm font-mono mt-2 text-gray-600">Risk Score: ${score.toFixed(3)}</p>` : '';
+
+                return `
+                        <div class="p-6 rounded-xl shadow-xl ${bgColor} border-2">
+                            <h3 class="text-xl font-extrabold text-gray-900">${title}</h3>
+                            <p class="text-4xl font-black text-gray-700 mt-2">${premiumText}</p>
+                            ${scoreHtml}
+                            <p class="text-sm text-gray-500 mt-3">${message}</p>
+                        </div>
+                    `;
+            };
+
+            APP_CONTAINER.innerHTML = `
+                    <div class="space-y-8">
+                        <div class="border-b pb-4 flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-800">Welcome, ${user.name}</h2>
+                            <button id="logout-btn" class="text-sm text-red-600 hover:text-red-800 transition duration-150">Log Out</button>
+                        </div>
+
+                        <!-- User Metadata -->
+                        <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-200">
+                            <p><strong>Device ID:</strong> <span class="font-mono text-gray-800">${currentUser.device_id}</span></p>
+                            <p><strong>Source Data:</strong> <span class="font-mono text-gray-800">${currentUser.source_device_id}</span></p>
+                        </div>
+
+                        <!-- Telematics Features -->
+                        <section>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Driving Features</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                ${renderFeatureCard("Distance Driven", features.total_distance_km, "km", false)}
+                                ${renderFeatureCard("Hard Brake Rate", features.hard_brake_rate_per_1000km, "events / 1000 km", features.hard_brake_rate_per_1000km > 5)}
+                                ${renderFeatureCard("Hard Accel Rate", features.hard_accel_rate_per_1000km, "events / 1000 km", features.hard_accel_rate_per_1000km > 5)}
+                                ${renderFeatureCard("High Speed Time", features.percent_time_high_speed, "% time > 90 km/h", features.percent_time_high_speed > 5)}
+                            </div>
+                        </section>
+
+                        <!-- Premium Estimates -->
+                        <section>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Premium Estimates</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                ${renderEstimateCard(
+                'Internal ML Model Quote',
+                estimates.internal_model.annual_premium,
+                estimates.internal_model.risk_score,
+                'Based on Logistic Regression trained on historic claim data.',
+                false
+            )}
+                                ${renderEstimateCard(
+                'External Vendor Simulation',
+                estimates.external_vendor.annual_premium,
+                undefined,
+                estimates.external_vendor.quote_message,
+                true
+            )}
+                            </div>
+                        </section>
+                    </div>
+                `;
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+        }
+
+        // --- HANDLERS ---
+
+        async function handleAuth(isLogin, username, password, name = '') {
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = renderLoading('Authenticating...');
+
+            // Remove previous alerts
+            const oldAlert = document.querySelector('.alert-message');
+            if (oldAlert) oldAlert.remove();
+
+            const endpoint = isLogin ? '/login' : '/create_user';
+            const payload = isLogin ? { username, password } : { username, password, name };
+
+            try {
+                const data = await postData(`${API_BASE_URL}${endpoint}`, payload);
+                currentUser = data.user;
+                showAlert(`${isLogin ? 'Login' : 'Account creation'} successful!`, 'success');
+                await fetchAndRenderEstimate();
+
+            } catch (error) {
+                showAlert(`Authentication failed: ${error.message}`);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isLogin ? 'Log In' : 'Create Account';
+            }
+        }
+
+        async function fetchAndRenderEstimate() {
+            APP_CONTAINER.innerHTML = renderLoading('Fetching estimates and calculating risk...');
+            try {
+                const estimateData = await postData(`${API_BASE_URL}/estimate`, currentUser);
+                renderDashboard(estimateData);
+            } catch (error) {
+                showAlert(`Failed to fetch estimate data: ${error.message}. Check API logs and network status.`);
+                handleLogout();
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            renderAuthForm(true);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAuthForm(true);
+        });
+
+    </script>
+</body>
+</html>
