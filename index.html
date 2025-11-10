@@ -41,41 +41,56 @@
 
         /** Renders a common loading spinner */
         function renderLoading(message) {
+            // Using inline SVG for better visual control and single-file setup
             return `
                     <div class="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <div class="loading-spinner animate-spin rounded-full h-12 w-12 border-4 border-gray-200"></div>
+                        <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                         <p class="mt-4 font-semibold">${message}</p>
                     </div>
-                `;
+                    `;
         }
 
         /** Shows messages to the user */
-        function showAlert(message, type = 'error') {
+        function showAlert(message, type = 'error', duration = 5000) {
             const container = document.getElementById('auth-form') || APP_CONTAINER;
-            const existingAlert = container.previousElementSibling;
-            if (existingAlert && existingAlert.classList.contains('alert-message')) {
+            // Find the closest sibling alert and remove it to prevent stacking
+            let existingAlert = container.previousElementSibling;
+            if (!existingAlert || !existingAlert.classList.contains('alert-message')) {
+                // If the target container is not the auth-form, search the app-container's first child
+                existingAlert = APP_CONTAINER.querySelector('.alert-message');
+            }
+            if (existingAlert) {
                 existingAlert.remove();
             }
 
+            const color = type === 'error' ? 'bg-red-100 text-red-700 border-red-500' : 'bg-green-100 text-green-700 border-green-500';
+            const iconPath = type === 'error'
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+
             const alertHtml = `
-                    <div class="alert-message p-3 mb-4 rounded-lg text-sm flex items-center ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'} transition duration-300">
-                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            ${type === 'error' ?
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>' :
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'
-                }
+                    <div class="alert-message p-3 mb-4 rounded-lg text-sm flex items-center border-l-4 ${color} transition duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            ${iconPath}
                         </svg>
                         ${message}
                     </div>
-                `;
-            container.insertAdjacentHTML('beforebegin', alertHtml);
+                    `;
+
+            // Insert before the relevant content
+            if (document.getElementById('auth-form')) {
+                document.getElementById('auth-form').insertAdjacentHTML('beforebegin', alertHtml);
+            } else {
+                APP_CONTAINER.insertAdjacentHTML('afterbegin', alertHtml);
+            }
 
             setTimeout(() => {
-                const newAlert = container.previousElementSibling;
-                if (newAlert && newAlert.classList.contains('alert-message')) {
-                    newAlert.remove();
-                }
-            }, 5000);
+                const newAlert = document.querySelector('.alert-message');
+                if (newAlert) newAlert.remove();
+            }, duration);
         }
 
         /** Simple fetch wrapper for POST requests with error handling */
@@ -85,9 +100,16 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            const result = await response.json();
+
+            // Note: If the API returns a 4xx or 5xx, we still need to read the JSON for the error message
+            const result = await response.json().catch(() => ({ error: 'Unknown response format from API' }));
+
             if (!response.ok) {
-                // Return API's error message if available, otherwise generic
+                // Check for specific "no data" message in the response body if applicable
+                if (result.error && result.error.includes("No estimate features found")) {
+                    throw new Error("NO_ESTIMATE_DATA");
+                }
+                // Throw general API error
                 throw new Error(result.error || `Request failed with status ${response.status}`);
             }
             return result;
@@ -106,19 +128,19 @@
                             ${!isLogin ? `
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                                    <input type="text" id="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                    <input type="text" id="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             ` : ''}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Username</label>
-                                <input type="text" id="username" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                <input type="text" id="username" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" id="password" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                <input type="password" id="password" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
 
-                            <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                            <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
                                 ${isLogin ? 'Log In' : 'Create Account'}
                             </button>
                         </form>
@@ -128,7 +150,7 @@
                         </button>
                         <p class="text-xs text-gray-400 text-center">Use 'driver1' / 'password' for existing users.</p>
                     </div>
-                `;
+                    `;
 
             document.getElementById('toggle-btn').addEventListener('click', () => renderAuthForm(!isLogin));
             document.getElementById('auth-form').addEventListener('submit', (e) => {
@@ -138,6 +160,27 @@
                 const name = isLogin ? '' : document.getElementById('name').value;
                 handleAuth(isLogin, username, password, name);
             });
+        }
+
+        function renderNoEstimateView() {
+            APP_CONTAINER.innerHTML = `
+                    <div class="space-y-6 text-center py-10">
+                        <svg class="mx-auto h-16 w-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <h2 class="text-2xl font-bold text-gray-800">No Estimate Available Yet</h2>
+                        <p class="text-gray-600">
+                            Your account is missing the required **raw telematics data** needed to calculate your risk features and premium estimate.
+                        </p>
+                        <button id="simulate-btn" class="w-full py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 transform hover:scale-[1.01] active:scale-[0.99]">
+                            Get Initial Estimate (Add Sample Data)
+                        </button>
+
+                        <button id="logout-btn-2" class="text-sm text-red-600 hover:text-red-800 transition duration-150 block w-full mt-4">Log Out</button>
+                    </div>
+                `;
+            document.getElementById('simulate-btn').addEventListener('click', handleSimulateData);
+            document.getElementById('logout-btn-2').addEventListener('click', handleLogout);
         }
 
         /** Renders the dashboard with features and estimates */
@@ -163,7 +206,7 @@
                         </p>
                         <p class="text-xs text-gray-400">${unit}</p>
                     </div>
-                `;
+                    `;
 
             // Helper to render estimate cards
             const renderEstimateCard = (title, premium, score, message, isExternal) => {
@@ -226,7 +269,7 @@
                             </div>
                         </section>
                     </div>
-                `;
+                    `;
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
         }
 
@@ -248,6 +291,7 @@
                 const data = await postData(`${API_BASE_URL}${endpoint}`, payload);
                 currentUser = data.user;
                 showAlert(`${isLogin ? 'Login' : 'Account creation'} successful!`, 'success');
+                // Attempt to fetch estimate after successful auth
                 await fetchAndRenderEstimate();
 
             } catch (error) {
@@ -260,11 +304,41 @@
         async function fetchAndRenderEstimate() {
             APP_CONTAINER.innerHTML = renderLoading('Fetching estimates and calculating risk...');
             try {
+                // Pass the user object received from the login/create API call
                 const estimateData = await postData(`${API_BASE_URL}/estimate`, currentUser);
                 renderDashboard(estimateData);
             } catch (error) {
-                showAlert(`Failed to fetch estimate data: ${error.message}. Check API logs and network status.`);
-                handleLogout();
+                if (error.message === "NO_ESTIMATE_DATA" || error.message.includes("estimate features found")) {
+                    // This is the expected path when the user is new and raw data is missing
+                    showAlert('No raw driving data found. Please add data to generate an estimate.', 'error', 8000);
+                    renderNoEstimateView();
+                } else {
+                    // This is a real unexpected error (network, server, etc.)
+                    showAlert(`Failed to fetch estimate data: ${error.message}. Check API logs and network status.`);
+                    handleLogout();
+                }
+            }
+        }
+
+        // New handler to call the API endpoint that simulates adding raw telematics data
+        async function handleSimulateData() {
+            const simulateBtn = document.getElementById('simulate-btn');
+            simulateBtn.disabled = true;
+            simulateBtn.innerHTML = renderLoading('Adding sample data...');
+
+            try {
+                // NOTE: This assumes your API has a new endpoint that takes the user context
+                // and writes random data to the raw_telematics collection in MongoDB.
+                await postData(`${API_BASE_URL}/simulate_telematics`, currentUser);
+                showAlert('Sample telematics data added! Recalculating estimate...', 'success', 5000);
+
+                // After adding data, retry fetching the estimate.
+                await fetchAndRenderEstimate();
+
+            } catch (error) {
+                showAlert(`Failed to simulate data: ${error.message}`);
+                simulateBtn.disabled = false;
+                simulateBtn.innerHTML = 'Get Initial Estimate (Add Sample Data)';
             }
         }
 
