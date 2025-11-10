@@ -43,14 +43,14 @@
         function renderLoading(message) {
             // Using inline SVG for better visual control and single-file setup
             return `
-                    <div class="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p class="mt-4 font-semibold">${message}</p>
-                    </div>
-                    `;
+                        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                            <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="mt-4 font-semibold">${message}</p>
+                        </div>
+                        `;
         }
 
         /** Shows messages to the user */
@@ -72,13 +72,13 @@
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
 
             const alertHtml = `
-                    <div class="alert-message p-3 mb-4 rounded-lg text-sm flex items-center border-l-4 ${color} transition duration-300">
-                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            ${iconPath}
-                        </svg>
-                        ${message}
-                    </div>
-                    `;
+                        <div class="alert-message p-3 mb-4 rounded-lg text-sm flex items-center border-l-4 ${color} transition duration-300">
+                            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                ${iconPath}
+                            </svg>
+                            ${message}
+                        </div>
+                        `;
 
             // Insert before the relevant content
             if (document.getElementById('auth-form')) {
@@ -119,38 +119,38 @@
 
         function renderAuthForm(isLogin = true) {
             APP_CONTAINER.innerHTML = `
-                    <div class="space-y-6">
-                        <h2 class="text-2xl font-bold text-center text-indigo-600">
-                            ${isLogin ? 'Log In to View Estimate' : 'Create New Account'}
-                        </h2>
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-bold text-center text-indigo-600">
+                                ${isLogin ? 'Log In to View Estimate' : 'Create New Account'}
+                            </h2>
 
-                        <form id="auth-form" class="space-y-4">
-                            ${!isLogin ? `
+                            <form id="auth-form" class="space-y-4">
+                                ${!isLogin ? `
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                                        <input type="text" id="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                ` : ''}
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                                    <input type="text" id="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                                    <input type="text" id="username" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
-                            ` : ''}
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Username</label>
-                                <input type="text" id="username" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" id="password" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                                    <input type="password" id="password" value="${isLogin ? '' : ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
 
-                            <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
-                                ${isLogin ? 'Log In' : 'Create Account'}
+                                <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                                    ${isLogin ? 'Log In' : 'Create Account'}
+                                </button>
+                            </form>
+
+                            <button id="toggle-btn" class="w-full text-sm text-gray-500 hover:text-indigo-600 transition duration-150 mt-4">
+                                ${isLogin ? 'Need an account? Create User' : 'Already have an account? Log In'}
                             </button>
-                        </form>
-
-                        <button id="toggle-btn" class="w-full text-sm text-gray-500 hover:text-indigo-600 transition duration-150 mt-4">
-                            ${isLogin ? 'Need an account? Create User' : 'Already have an account? Log In'}
-                        </button>
-                        <p class="text-xs text-gray-400 text-center">Use 'driver1' / 'password' for existing users.</p>
-                    </div>
-                    `;
+                            <p class="text-xs text-gray-400 text-center">Use 'driver1' / 'password' for existing users.</p>
+                        </div>
+                        `;
 
             document.getElementById('toggle-btn').addEventListener('click', () => renderAuthForm(!isLogin));
             document.getElementById('auth-form').addEventListener('submit', (e) => {
@@ -164,29 +164,71 @@
 
         function renderNoEstimateView() {
             APP_CONTAINER.innerHTML = `
-                    <div class="space-y-6 text-center py-10">
-                        <svg class="mx-auto h-16 w-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <h2 class="text-2xl font-bold text-gray-800">No Estimate Available Yet</h2>
+                        <div class="space-y-6 text-center py-10">
+                            <svg class="mx-auto h-16 w-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <h2 class="text-2xl font-bold text-gray-800">No Estimate Available Yet</h2>
 
-                        <!-- NEW MESSAGE HERE -->
-                        <p class="text-xl font-semibold text-red-600 mt-2 mb-4">
-                            Cannot yet provide estimate for user.
-                        </p>
+                            <!-- NEW MESSAGE HERE -->
+                            <p class="text-xl font-semibold text-red-600 mt-2 mb-4">
+                                Cannot yet provide estimate for user.
+                            </p>
 
-                        <p class="text-gray-600">
-                            Your account is missing the required **raw telematics data** needed to calculate your risk features and premium estimate.
-                        </p>
-                        <button id="simulate-btn" class="w-full py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 transform hover:scale-[1.01] active:scale-[0.99]">
-                            Get Initial Estimate (Add Sample Data)
-                        </button>
+                            <p class="text-gray-600">
+                                Your account is missing the required <strong>raw telematics data</strong> needed to calculate your risk features and premium estimate.
+                            </p>
+                            <button id="simulate-btn" class="w-full py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 transform hover:scale-[1.01] active:scale-[0.99]">
+                                Get Initial Estimate (Add Sample Data)
+                            </button>
 
-                        <button id="logout-btn-2" class="text-sm text-red-600 hover:text-red-800 transition duration-150 block w-full mt-4">Log Out</button>
-                    </div>
-                `;
+                            <button id="logout-btn-2" class="text-sm text-red-600 hover:text-red-800 transition duration-150 block w-full mt-4">Log Out</button>
+                        </div>
+                        `;
             document.getElementById('simulate-btn').addEventListener('click', handleSimulateData);
             document.getElementById('logout-btn-2').addEventListener('click', handleLogout);
+        }
+
+        /** Renders the User Profile View */
+        function renderProfileView(user) {
+            APP_CONTAINER.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between border-b pb-4">
+                            <h2 class="text-2xl font-bold text-indigo-600">User Profile</h2>
+                            <button id="back-to-dashboard-btn" class="text-sm text-gray-600 hover:text-indigo-800 transition duration-150 flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                Back to Dashboard
+                            </button>
+                        </div>
+
+                        <form id="profile-form" class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-200">
+                                <p class="mb-2"><strong>Username:</strong> <span class="font-mono text-gray-800">${user.username}</span></p>
+                                <p><strong>Device ID:</strong> <span class="font-mono text-gray-800">${user.device_id}</span></p>
+                                <p class="text-xs mt-2 text-red-500">Username and Device ID cannot be changed here.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700" for="update-name">Full Name</label>
+                                <input type="text" id="update-name" value="${user.name || ''}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+
+                            <button type="submit" id="update-profile-btn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300">
+                                Save Profile Changes
+                            </button>
+                        </form>
+
+                        <button id="logout-btn-profile" class="text-sm text-red-600 hover:text-red-800 transition duration-150 block w-full pt-4 border-t">Log Out</button>
+                    </div>
+                `;
+
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', fetchAndRenderEstimate);
+            document.getElementById('logout-btn-profile').addEventListener('click', handleLogout);
+            document.getElementById('profile-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newName = document.getElementById('update-name').value;
+                handleUpdateProfile(newName);
+            });
         }
 
         /** Renders the dashboard with features and estimates */
@@ -205,14 +247,14 @@
 
             // Helper to render feature cards
             const renderFeatureCard = (title, value, unit, isHighRisk) => `
-                    <div class="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-500">${title}</h3>
-                        <p class="text-2xl font-bold mt-1 ${isHighRisk ? 'text-red-600' : 'text-green-700'}">
-                            ${typeof value === 'number' ? value.toFixed(1) : NO_DATA_TEXT}
-                        </p>
-                        <p class="text-xs text-gray-400">${unit}</p>
-                    </div>
-                    `;
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-md border border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-500">${title}</h3>
+                            <p class="text-2xl font-bold mt-1 ${isHighRisk ? 'text-red-600' : 'text-green-700'}">
+                                ${typeof value === 'number' ? value.toFixed(1) : NO_DATA_TEXT}
+                            </p>
+                            <p class="text-xs text-gray-400">${unit}</p>
+                        </div>
+                        `;
 
             // Helper to render estimate cards
             const renderEstimateCard = (title, premium, score, message, isExternal) => {
@@ -221,62 +263,66 @@
                 const scoreHtml = score !== undefined ? `<p class="text-sm font-mono mt-2 text-gray-600">Risk Score: ${score.toFixed(3)}</p>` : '';
 
                 return `
-                        <div class="p-6 rounded-xl shadow-xl ${bgColor} border-2">
-                            <h3 class="text-xl font-extrabold text-gray-900">${title}</h3>
-                            <p class="text-4xl font-black text-gray-700 mt-2">${premiumText}</p>
-                            ${scoreHtml}
-                            <p class="text-sm text-gray-500 mt-3">${message}</p>
-                        </div>
-                    `;
+                            <div class="p-6 rounded-xl shadow-xl ${bgColor} border-2">
+                                <h3 class="text-xl font-extrabold text-gray-900">${title}</h3>
+                                <p class="text-4xl font-black text-gray-700 mt-2">${premiumText}</p>
+                                ${scoreHtml}
+                                <p class="text-sm text-gray-500 mt-3">${message}</p>
+                            </div>
+                        `;
             };
 
             APP_CONTAINER.innerHTML = `
-                    <div class="space-y-8">
-                        <div class="border-b pb-4 flex justify-between items-center">
-                            <h2 class="text-2xl font-bold text-gray-800">Welcome, ${user.name}</h2>
-                            <button id="logout-btn" class="text-sm text-red-600 hover:text-red-800 transition duration-150">Log Out</button>
-                        </div>
-
-                        <!-- User Metadata -->
-                        <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-200">
-                            <p><strong>Device ID:</strong> <span class="font-mono text-gray-800">${currentUser.device_id}</span></p>
-                            <p><strong>Source Data:</strong> <span class="font-mono text-gray-800">${currentUser.source_device_id}</span></p>
-                        </div>
-
-                        <!-- Telematics Features -->
-                        <section>
-                            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Driving Features</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                ${renderFeatureCard("Distance Driven", features.total_distance_km, "km", false)}
-                                ${renderFeatureCard("Hard Brake Rate", features.hard_brake_rate_per_1000km, "events / 1000 km", features.hard_brake_rate_per_1000km > 5)}
-                                ${renderFeatureCard("Hard Accel Rate", features.hard_accel_rate_per_1000km, "events / 1000 km", features.hard_accel_rate_per_1000km > 5)}
-                                ${renderFeatureCard("High Speed Time", features.percent_time_high_speed, "% time > 90 km/h", features.percent_time_high_speed > 5)}
+                        <div class="space-y-8">
+                            <div class="border-b pb-4 flex justify-between items-center">
+                                <h2 class="text-2xl font-bold text-gray-800">Welcome, ${user.name}</h2>
+                                <div class="flex space-x-3">
+                                    <button id="profile-btn" class="text-sm text-indigo-600 hover:text-indigo-800 transition duration-150">Profile</button>
+                                    <button id="logout-btn" class="text-sm text-red-600 hover:text-red-800 transition duration-150">Log Out</button>
+                                </div>
                             </div>
-                        </section>
 
-                        <!-- Premium Estimates -->
-                        <section>
-                            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Premium Estimates</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                ${renderEstimateCard(
+                            <!-- User Metadata -->
+                            <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-200">
+                                <p><strong>Device ID:</strong> <span class="font-mono text-gray-800">${currentUser.device_id}</span></p>
+                                <p><strong>Source Data:</strong> <span class="font-mono text-gray-800">${currentUser.source_device_id}</span></p>
+                            </div>
+
+                            <!-- Telematics Features -->
+                            <section>
+                                <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Driving Features</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    ${renderFeatureCard("Distance Driven", features.total_distance_km, "km", false)}
+                                    ${renderFeatureCard("Hard Brake Rate", features.hard_brake_rate_per_1000km, "events / 1000 km", features.hard_brake_rate_per_1000km > 5)}
+                                    ${renderFeatureCard("Hard Accel Rate", features.hard_accel_rate_per_1000km, "events / 1000 km", features.hard_accel_rate_per_1000km > 5)}
+                                    ${renderFeatureCard("High Speed Time", features.percent_time_high_speed, "% time > 90 km/h", features.percent_time_high_speed > 5)}
+                                </div>
+                            </section>
+
+                            <!-- Premium Estimates -->
+                            <section>
+                                <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Premium Estimates</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    ${renderEstimateCard(
                 'Internal ML Model Quote',
                 estimates.internal_model.annual_premium,
                 estimates.internal_model.risk_score,
                 'Based on Logistic Regression trained on historic claim data.',
                 false
             )}
-                                ${renderEstimateCard(
+                                    ${renderEstimateCard(
                 'External Vendor Simulation',
                 estimates.external_vendor.annual_premium,
                 undefined,
                 estimates.external_vendor.quote_message,
                 true
             )}
-                            </div>
-                        </section>
-                    </div>
-                    `;
+                                </div>
+                            </section>
+                        </div>
+                        `;
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('profile-btn').addEventListener('click', () => renderProfileView(user));
         }
 
         // --- HANDLERS ---
@@ -312,6 +358,8 @@
             try {
                 // Pass the user object received from the login/create API call
                 const estimateData = await postData(`${API_BASE_URL}/estimate`, currentUser);
+                // Update currentUser object with fresh data (especially the name field if it was just updated)
+                currentUser = estimateData.user_info;
                 renderDashboard(estimateData);
             } catch (error) {
                 if (error.message === "NO_ESTIMATE_DATA" || error.message.includes("estimate features found")) {
@@ -326,6 +374,37 @@
             }
         }
 
+        /** NEW: Handles updating the user's name via the API */
+        async function handleUpdateProfile(newName) {
+            const updateBtn = document.getElementById('update-profile-btn');
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = renderLoading('Saving...');
+
+            const endpoint = '/update_profile';
+            // Send the entire currentUser object plus the new name
+            const payload = {
+                ...currentUser,
+                name: newName,
+            };
+
+            try {
+                const data = await postData(`${API_BASE_URL}${endpoint}`, payload);
+
+                // Update the local currentUser object with the new data returned from the API
+                currentUser = data.user;
+
+                showAlert('Profile successfully updated!', 'success');
+                // Go back to the dashboard to show the updated name
+                await fetchAndRenderEstimate();
+
+            } catch (error) {
+                showAlert(`Failed to update profile: ${error.message}`);
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = 'Save Profile Changes';
+            }
+        }
+
+
         // New handler to call the API endpoint that simulates adding raw telematics data
         async function handleSimulateData() {
             const simulateBtn = document.getElementById('simulate-btn');
@@ -333,8 +412,6 @@
             simulateBtn.innerHTML = renderLoading('Adding sample data...');
 
             try {
-                // NOTE: This assumes your API has a new endpoint that takes the user context
-                // and writes random data to the raw_telematics collection in MongoDB.
                 await postData(`${API_BASE_URL}/simulate_telematics`, currentUser);
                 showAlert('Sample telematics data added! Recalculating estimate...', 'success', 5000);
 
@@ -351,6 +428,7 @@
         function handleLogout() {
             currentUser = null;
             renderAuthForm(true);
+            document.getElementById('app-title').textContent = 'Telematics Risk Dashboard';
         }
 
         // --- INITIALIZATION ---
